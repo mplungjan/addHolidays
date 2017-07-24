@@ -1,5 +1,6 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
 <script type="text/javascript">
 /* Holiday script using jQuery for calendar
    (c) 2010-2017 Michel Plungjan javascripts(a)plungjan.name
@@ -53,7 +54,7 @@ function getVariableHoliday(dateString,year) {
     yearMaps[year] = [];
     for (var o in variableHolidayMap) {
       var varHolString = eval('NthDay('+variableHolidayMap[o]+','+year+')');
-      alert(o+':'+varHolString)
+      console.log(o+':'+varHolString)
       yearMaps[year][varHolString] = o;
     }
   }
@@ -88,9 +89,7 @@ for (var o in fixedHolidayMap) { // build a holiday by dateString
   availableTags[availableTags.length] = o;
   fixedHoliday[fixedHolidayMap[o]]=o;
 }
-
 for (var o in variableHolidayMap) availableTags[availableTags.length] = o;
-
  $(document).ready(function() {
    $('#holidayDate').datepicker();
    $("#tags").autocomplete({
@@ -117,9 +116,7 @@ for (var o in variableHolidayMap) availableTags[availableTags.length] = o;
      }
      $('#tags').val(res);
   });
-
  });
-
 </script>
 <input id="holidayDate" type="text" />
 <input id="tags"></input>
