@@ -24,6 +24,7 @@
       d.setMonth(d.getMonth() + 1, 0, 0, 0, 0); // last of the month, normalised;
       while (d.getDay() != whichDay) d.setDate(d.getDate() - 1);
     }
+    console.log(d.toLocaleDateString())
     return (d.getMonth() + 1).pad(2) + '/' + d.getDate().pad(2);
   }
   /* Easter Calculation by Stephen Chapman http://www.felgall.com March 2007
