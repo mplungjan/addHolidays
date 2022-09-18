@@ -2,14 +2,14 @@
 <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
 <script>
-  /* Holiday script using jQuery/jQUeryUI calendar
+window.addEventListener("DOMContentLoaded", () => {
+  /* Holiday script for calendar
    (c) 2010-2022 Michel Plungjan javascripts(a)plungjan.name
-   Aim is eventually to turn this into a jQuery Plugin
 */
   Number.prototype.pad = function(n) { return String(this).padStart(n,"0")};
   const Sun = 0, Mon = 1, Tue = 2, Wed = 3, Thu = 4, Fri = 5, Sat = 6;
 
-  const NthDay = (whatOffset, whichDay, whichMonth, whichYear) => {
+    const NthDay = (whatOffset, whichDay, whichMonth, whichYear) => {
     // examples - whichDay is Sun=0 to Sat=6:
     // 3rd Monday in January 2010: (3,1,1,2010);     // Martin Luther King day 2010
     // 3rd Monday In February, current year (3,1,2); // Washington Day
@@ -27,6 +27,7 @@
     console.log(d.toLocaleDateString())
     return (d.getMonth() + 1).pad(2) + '/' + d.getDate().pad(2);
   }
+
   /* Easter Calculation by Stephen Chapman http://www.felgall.com March 2007
    ("Meeus/Jones/Butcher Gregorian algorithm".) */
   const easter = (year) => {
@@ -46,20 +47,20 @@
     let day = ((h + k - 7 * m + 114) % 31) + 1;
     return [3, 4][month - 3].pad(2) + '/' + day.pad(2);
   }
-  let yearMaps = [];
+  const yearMaps = [];
 
   const getVariableHoliday = (dateString, year) => {
     if (!yearMaps[year]) {
       yearMaps[year] = [];
       for (let o in variableHolidayMap) {
         let varHolString = eval('NthDay(' + variableHolidayMap[o] + ',' + year + ')');
-        console.log(o + ':' + varHolString)
+        // console.log(o + ':' + varHolString)
         yearMaps[year][varHolString] = o;
       }
     }
     return yearMaps[year][dateString];
   }
-  let fixedHolidayMap = { // "Name of day":"MM/DD"
+  const fixedHolidayMap = { // "Name of day":"MM/DD"
     "New years Day": "01/01",
     "Groundhog Day": "02/02",
     "Valentine's Day": "02/14",
@@ -71,7 +72,7 @@
     "Pearl Harbor Remembrance Day": "12/07",
     "Christmas Day": "12/25"
   }
-  let variableHolidayMap = { // "Name of day":"Nth,DDD,M"
+  const variableHolidayMap = { // "Name of day":"Nth,DDD,M"
     "Martin Luther King Day": "3,Mon,1", // 3rd Mon in Jan
     "Washington's Birthday": "3,Mon,2", // 3rd Mon in Feb
     "National Arbor Day": "-1,Fri,4", // Last Fri of Apr
@@ -82,41 +83,43 @@
     "Columbus Day": "2,Mon,10", // 2nd Mon in Oct
     "Thanksgiving Day": "4,Thu,11" // 4th Thu in Nov
   };
-  let availableTags = ["Easter"]; // the odd one out
-  let fixedHoliday = [];
+  const availableTags = ["Easter"]; // the odd one out
+  const fixedHoliday = [];
   for (let o in fixedHolidayMap) { // build a holiday by dateString
     availableTags[availableTags.length] = o;
     fixedHoliday[fixedHolidayMap[o]] = o;
   }
   for (let o in variableHolidayMap) availableTags[availableTags.length] = o;
-  $(document).ready(function() {
-    $('#holidayDate').datepicker();
-    $("#tags").autocomplete({
-      source: availableTags,
-      select: function(event, ui) {
-        let res = "";
-        let thisYear = new Date().getFullYear();
-        if (fixedHolidayMap[ui.item.value]) res = fixedHolidayMap[ui.item.value];
-        else if (ui.item.value == "Easter") res = easter(thisYear);
-        else if (variableHolidayMap[ui.item.value]) res = eval('NthDay(' + variableHolidayMap[ui.item.value] + ',' + thisYear + ')')
-        if (res) res += '/' + thisYear;
-        $('#holidayDate').val(res);
-      }
-    });
-    $('#holidayDate').change(function() {
-      let dateString = $(this).val().substring(0, 5);
-      let year = $(this).val().substring(6);
-      let res = "";
-      if (fixedHoliday[dateString]) res = fixedHoliday[dateString]
-      else if (dateString == easter(year)) res = "Easter";
-      else {
-        let holiday = getVariableHoliday(dateString, year);
-        if (holiday) res = holiday;
-      }
-      $('#tags').val(res);
-    });
+  const holidayDate = document.getElementById("holidayDate");
+  const tags = document.getElementById("tags");
+  const tagList = document.getElementById("tagList");
+  tagList.innerHTML = availableTags.map(tag => `<option value="${tag}" />`).join("");
+  tags.addEventListener("change", function() {
+    let res = "";
+    let thisYear = new Date().getFullYear();
+    let val = this.value;
+    if (fixedHolidayMap[val]) res = fixedHolidayMap[val];
+    else if (val == "Easter") res = easter(thisYear);
+    else if (variableHolidayMap[val]) res = eval('NthDay(' + variableHolidayMap[val] + ',' + thisYear + ')')
+    if (res) res += '/' + thisYear;
+    const date = new Date(res)
+    date.setHours(15,0,0,0); // normalise
+    holidayDate.valueAsDate  = date;
   });
-
+  holidayDate.addEventListener("input", function() {
+    let date = this.valueAsDate;
+    let year = date.getFullYear();
+    let dateString = `${(date.getMonth()+1).pad(2)}/${date.getDate().pad(2)}`;
+    let res = "";
+    if (fixedHoliday[dateString]) res = fixedHoliday[dateString]
+    else if (dateString == easter(year)) res = "Easter";
+    else {
+      var holiday = getVariableHoliday(dateString, year);
+      if (holiday) res = holiday;
+    }
+    tags.value = res;
+  });
+});
 </script>
 <input id="holidayDate" type="text" />
 <input id="tags" />
